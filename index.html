@@ -3,24 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Story Card Editor</title>
+  <title>Card Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
-      --page-bg: #eef2f1;
-      --panel-bg: #ffffff;
-      --panel-border: #dbe4de;
-      --panel-text: #122118;
-      --muted: #5e6d64;
-      --accent: #166534;
-      --accent-strong: #0f5132;
-      --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.14);
-      --shadow-card: 0 28px 60px rgba(15, 23, 42, 0.22);
-      --preview-size: min(500px, calc(100vw - 460px), calc(100vh - 170px));
-      --pattern-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20z' fill='%23d4af37' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E");
+      --panel-width: 340px;
+      --preview-size: 500px;
     }
 
     * {
@@ -30,109 +21,75 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(52, 211, 153, 0.14), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 25%),
-        var(--page-bg);
-      color: var(--panel-text);
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #1f2937;
     }
 
     .app {
-      display: flex;
       min-height: 100vh;
-    }
-
-    .panel {
-      width: min(380px, 100%);
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(12px);
-      border-right: 1px solid var(--panel-border);
-      box-shadow: var(--shadow-lg);
-      padding: 28px 24px;
-      overflow-y: auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .panel-header {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 24px;
+      flex-direction: row;
     }
 
-    .panel-title {
-      margin: 0;
+    .controls {
+      width: min(var(--panel-width), 100%);
+      background: #ffffff;
+      padding: 24px;
+      border-right: 1px solid #e5e7eb;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      overflow-y: auto;
+    }
+
+    .controls h1 {
+      margin: 0 0 24px;
       font-size: 1.25rem;
       font-weight: 700;
-    }
-
-    .panel-subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.4;
+      color: #111827;
     }
 
     .section {
       margin-bottom: 24px;
     }
 
-    .section-title {
-      margin: 0 0 12px;
-      color: var(--muted);
-      font-size: 0.78rem;
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+    }
+
+    input[type="text"],
+    textarea,
+    input[type="range"] {
+      width: 100%;
+    }
+
+    input[type="text"],
+    textarea {
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font: inherit;
+      background: #ffffff;
+    }
+
+    textarea {
+      min-height: 112px;
+      resize: vertical;
     }
 
     .field {
       margin-bottom: 14px;
     }
 
-    .field:last-child {
-      margin-bottom: 0;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      color: #31443a;
-    }
-
-    input[type="text"],
-    textarea {
-      width: 100%;
-      border: 1px solid #cfd9d2;
-      border-radius: 12px;
-      background: #ffffff;
-      color: var(--panel-text);
-      padding: 12px 14px;
-      font: inherit;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus {
-      outline: none;
-      border-color: rgba(22, 101, 52, 0.55);
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
-    }
-
-    textarea {
-      min-height: 130px;
-      resize: vertical;
-    }
-
     .theme-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
 
     .theme-button {
@@ -141,92 +98,85 @@
       border-radius: 999px;
       border: 2px solid transparent;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    .theme-button:hover {
-      transform: scale(1.05);
+      transition: transform 0.15s ease, border-color 0.15s ease;
     }
 
     .theme-button.active {
+      border-color: #059669;
       transform: scale(1.08);
-      border-color: #065f46;
-      box-shadow: 0 10px 20px rgba(6, 95, 70, 0.16);
+    }
+
+    .button,
+    .upload-button,
+    .align-button {
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      font: inherit;
+      cursor: pointer;
     }
 
     .upload-button,
-    .download-button {
+    .button {
       width: 100%;
-      border: 1px solid #cfd9d2;
-      border-radius: 14px;
-      padding: 13px 16px;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      padding: 12px;
     }
 
-    .upload-button {
-      background: #ffffff;
-      border-style: dashed;
-      color: var(--muted);
-    }
-
-    .upload-button:hover {
-      border-color: rgba(22, 101, 52, 0.55);
-      background: #f7fbf8;
-    }
-
-    .download-button {
-      background: linear-gradient(135deg, #166534 0%, #0f5132 100%);
+    .button.primary {
+      background: #065f46;
       color: #ffffff;
-      border-color: transparent;
-      box-shadow: 0 14px 30px rgba(22, 101, 52, 0.22);
+      border-color: #065f46;
+      font-weight: 700;
     }
 
-    .download-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 34px rgba(22, 101, 52, 0.26);
-    }
-
-    .download-button:disabled {
-      cursor: wait;
+    .button.primary:disabled {
       opacity: 0.7;
-      transform: none;
-      box-shadow: 0 12px 24px rgba(22, 101, 52, 0.18);
+      cursor: wait;
+    }
+
+    .align-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .align-button {
+      padding: 10px 8px;
+      font-size: 0.85rem;
+    }
+
+    .align-button.active {
+      background: #065f46;
+      color: #ffffff;
+      border-color: #065f46;
     }
 
     .slider-row {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
-    .slider-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .slider-header {
+    .slider-head {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      color: #6b7280;
       text-transform: uppercase;
+      font-weight: 700;
     }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-      cursor: pointer;
+    .divider {
+      border: 0;
+      border-top: 1px solid #f0f2f4;
+      margin: 24px 0;
     }
 
     .status {
-      min-height: 1.3rem;
       margin-top: 10px;
-      color: var(--muted);
+      min-height: 20px;
       font-size: 0.84rem;
+      color: #6b7280;
     }
 
     .preview-shell {
@@ -234,83 +184,68 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      background: #e5e7eb;
+      padding: 16px;
       overflow: auto;
-      position: relative;
     }
 
-    .preview-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, rgba(15, 81, 50, 0.08), transparent 45%),
-        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45), transparent 40%);
-      pointer-events: none;
-    }
-
-    .preview-area {
-      position: relative;
-      z-index: 1;
+    .preview-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
       width: 100%;
-      min-height: 100%;
     }
 
-    .preview-heading {
+    .preview-head {
       text-align: center;
+      color: #6b7280;
+      font-size: 0.8rem;
     }
 
-    .preview-heading h2 {
+    .preview-head h2 {
       margin: 0 0 4px;
-      font-size: 1.15rem;
+      color: #374151;
+      font-size: 1.1rem;
     }
 
-    .preview-heading p,
-    .preview-footnote {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.84rem;
+    .card-stage {
+      width: min(var(--preview-size), calc(100vw - 48px), calc(100vh - 140px));
+      height: min(var(--preview-size), calc(100vw - 48px), calc(100vh - 140px));
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card {
       position: relative;
-      width: var(--preview-size);
-      height: var(--preview-size);
-      padding: 30px;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      color: #f1f8f4;
-      box-shadow: var(--shadow-card);
       display: flex;
       flex-direction: column;
+      align-items: center;
       text-align: center;
-      transition: background 0.3s ease, padding 0.3s ease;
-      isolation: isolate;
+      color: #f1f8f4;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.22);
     }
 
-    .card-pattern,
-    .card-frame,
-    .card-corners {
+    .pattern {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-    }
-
-    .card-pattern {
-      background-image: var(--pattern-image);
-      opacity: 0.08;
       z-index: 0;
+      pointer-events: none;
+      background-repeat: repeat;
     }
 
-    .card-frame {
+    .frame {
+      position: absolute;
       inset: 16px;
       border: 1px solid rgba(197, 160, 89, 0.4);
       border-radius: 18px;
       box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
       z-index: 1;
     }
 
@@ -320,6 +255,7 @@
       height: 20px;
       border-color: #c5a059;
       z-index: 1;
+      pointer-events: none;
     }
 
     .corner.top-left {
@@ -350,14 +286,15 @@
       border-right: 2px solid;
     }
 
-    .card-content {
+    .content-layer {
       position: relative;
       z-index: 2;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      width: 100%;
-      height: 100%;
+      padding: 30px;
     }
 
     .badge-wrap {
@@ -369,33 +306,30 @@
     }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px 14px;
-      border-radius: 999px;
+      padding: 3px 12px;
       border: 1px solid rgba(197, 160, 89, 0.5);
+      border-radius: 999px;
       background: rgba(255, 255, 255, 0.1);
       color: #d8f3dc;
       font-family: "Reem Kufi", sans-serif;
-      font-size: 0.74rem;
-      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
     }
 
     .moon {
-      font-size: 1.8rem;
-      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+      font-size: 1.7rem;
       line-height: 1;
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
     }
 
-    .card-title {
-      margin: 0 0 16px;
-      line-height: 1.2;
-      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    .title {
+      margin: 0 0 14px;
+      line-height: 1.35;
       font-size: 2rem;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     }
 
-    .text-gradient-gold {
+    .title.gold {
       background: linear-gradient(to bottom, #fff, #ebd393);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -403,17 +337,13 @@
       color: transparent;
     }
 
-    .body-shell {
+    .body-wrap {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
       padding: 0 8px;
-    }
-
-    .content-shell {
-      width: 100%;
     }
 
     .glass-card {
@@ -429,10 +359,10 @@
     .content-text {
       margin: 0;
       white-space: pre-wrap;
-      line-height: 1.8;
+      color: inherit;
     }
 
-    .quote-mark {
+    .quote {
       display: block;
       height: 20px;
       color: #c5a059;
@@ -442,14 +372,14 @@
       line-height: 0.6;
     }
 
-    .quote-mark.bottom {
-      margin-top: 12px;
-      transform: rotate(180deg);
+    .quote.top {
+      margin-top: -4px;
+      margin-bottom: 10px;
     }
 
-    .quote-mark.top {
-      margin-bottom: 10px;
-      margin-top: -4px;
+    .quote.bottom {
+      margin-top: 12px;
+      transform: rotate(180deg);
     }
 
     .footer {
@@ -471,102 +401,97 @@
       gap: 12px;
       opacity: 0.72;
       font-size: 0.78rem;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
     }
 
-    .line {
-      width: 34px;
+    .website-line {
+      width: 32px;
       height: 1px;
       background: linear-gradient(to right, transparent, #567e6a, transparent);
     }
 
-    .is-hidden {
+    .hidden {
       display: none !important;
     }
 
-    .divider {
-      border: 0;
-      border-top: 1px solid #edf2ee;
-      margin: 24px 0;
+    .preview-note {
+      color: #9ca3af;
+      font-size: 0.8rem;
     }
 
     @media (max-width: 900px) {
-      :root {
-        --preview-size: min(500px, calc(100vw - 32px), calc(100vh - 260px));
-      }
-
-      .card-title {
-        font-size: 1.8rem;
-      }
-
       .app {
         flex-direction: column;
       }
 
-      .panel {
+      .controls {
         width: 100%;
-        max-height: none;
         border-right: 0;
-        border-bottom: 1px solid var(--panel-border);
+        border-bottom: 1px solid #e5e7eb;
       }
 
-      .preview-shell {
-        padding: 20px 16px 28px;
+      .card-stage {
+        width: min(var(--preview-size), calc(100vw - 32px), calc(100vh - 260px));
+        height: min(var(--preview-size), calc(100vw - 32px), calc(100vh - 260px));
+      }
+
+      .title {
+        font-size: 1.8rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="panel">
-      <div class="panel-header">
-        <div>
-          <h1 class="panel-title">Card Editor</h1>
-          <p class="panel-subtitle">Edit the text, switch the theme, upload any image, then download the final square card as a PNG.</p>
-        </div>
-      </div>
+    <aside class="controls">
+      <h1>Card Editor</h1>
 
-      <section class="section">
-        <h2 class="section-title">Content</h2>
-
+      <div class="section">
         <div class="field">
-          <label for="titleInput">Title</label>
+          <label class="label" for="titleInput">Title</label>
           <input id="titleInput" type="text" dir="auto" />
         </div>
 
         <div class="field">
-          <label for="contentInput">Content</label>
+          <label class="label" for="contentInput">Content</label>
           <textarea id="contentInput" dir="auto"></textarea>
         </div>
 
         <div class="field">
-          <label for="authorInput">Footer Info</label>
+          <label class="label" for="authorInput">Footer Info</label>
           <input id="authorInput" type="text" placeholder="Author Name" dir="auto" />
         </div>
 
         <div class="field">
           <input id="websiteInput" type="text" placeholder="Website" dir="auto" />
         </div>
-      </section>
+      </div>
 
       <hr class="divider" />
 
-      <section class="section">
-        <h2 class="section-title">Theme</h2>
+      <div class="section">
+        <label class="label">Theme</label>
         <div id="themeGrid" class="theme-grid"></div>
-      </section>
+      </div>
 
-      <section class="section">
-        <h2 class="section-title">Background Image</h2>
+      <div class="section">
+        <label class="label">Background Upload</label>
         <input id="imageInput" type="file" accept="image/*" hidden />
         <button id="imageButton" class="upload-button" type="button">Upload Image</button>
-      </section>
+      </div>
 
-      <section class="section">
-        <h2 class="section-title">Style</h2>
+      <div class="section">
+        <label class="label">Alignment</label>
+        <div class="align-grid">
+          <button id="alignLeft" class="align-button" type="button">Left</button>
+          <button id="alignCenter" class="align-button" type="button">Center</button>
+          <button id="alignRight" class="align-button" type="button">Right</button>
+        </div>
+      </div>
 
+      <div class="section">
         <div class="slider-row">
-          <div class="slider-header">
+          <div class="slider-head">
             <span>Text Size</span>
             <span id="fontSizeValue"></span>
           </div>
@@ -574,7 +499,7 @@
         </div>
 
         <div class="slider-row">
-          <div class="slider-header">
+          <div class="slider-head">
             <span>Spacing</span>
             <span id="lineHeightValue"></span>
           </div>
@@ -582,68 +507,69 @@
         </div>
 
         <div class="slider-row">
-          <div class="slider-header">
+          <div class="slider-head">
             <span>Padding</span>
             <span id="paddingValue"></span>
           </div>
           <input id="paddingInput" type="range" min="10" max="80" step="1" />
         </div>
-      </section>
+      </div>
 
-      <section class="section">
-        <button id="downloadButton" class="download-button" type="button">Download as PNG</button>
-        <p id="statusText" class="status"></p>
-      </section>
+      <div class="section">
+        <button id="downloadButton" class="button primary" type="button">Download as PNG</button>
+        <div id="statusText" class="status"></div>
+      </div>
     </aside>
 
     <main class="preview-shell">
-      <div class="preview-area">
-        <div class="preview-heading">
+      <div class="preview-wrap">
+        <div class="preview-head">
           <h2>Preview</h2>
-          <p>1:1 Square (WhatsApp Ready)</p>
+          <div>1:1 Square (WhatsApp Ready)</div>
         </div>
 
-        <div id="previewCard" class="card">
-          <div id="patternLayer" class="card-pattern"></div>
-          <div id="frameLayer" class="card-frame"></div>
-          <div id="cornersLayer" class="card-corners">
-            <span class="corner top-left"></span>
-            <span class="corner top-right"></span>
-            <span class="corner bottom-left"></span>
-            <span class="corner bottom-right"></span>
-          </div>
+        <div class="card-stage">
+          <div id="previewCard" class="card">
+            <div id="patternLayer" class="pattern"></div>
+            <div id="frameLayer" class="frame"></div>
+            <span class="corner top-left" id="cornerTopLeft"></span>
+            <span class="corner top-right" id="cornerTopRight"></span>
+            <span class="corner bottom-left" id="cornerBottomLeft"></span>
+            <span class="corner bottom-right" id="cornerBottomRight"></span>
 
-          <div class="card-content">
-            <div>
-              <div id="badgeWrap" class="badge-wrap">
-                <span class="badge">نفحات إيمانية</span>
-                <span class="moon">🌙</span>
+            <div id="contentLayer" class="content-layer">
+              <div>
+                <div id="badgeWrap" class="badge-wrap">
+                  <span class="badge">نفحات إيمانية</span>
+                  <span class="moon">🌙</span>
+                </div>
+
+                <h1 id="previewTitle" class="title" dir="auto"></h1>
               </div>
-              <h1 id="previewTitle" class="card-title" dir="auto"></h1>
-            </div>
 
-            <div class="body-shell">
-              <div id="contentShell" class="content-shell glass-card">
-                <p id="previewContent" class="content-text" dir="auto">
-                  <span id="quoteTop" class="quote-mark top">❝</span>
-                  <span id="contentText"></span>
-                  <span id="quoteBottom" class="quote-mark bottom">❝</span>
-                </p>
+              <div class="body-wrap">
+                <div id="contentShell" class="glass-card">
+                  <p id="previewContent" class="content-text" dir="auto">
+                    <span id="quoteTop" class="quote top">❝</span>
+                    <span id="contentText"></span>
+                    <span id="quoteBottom" class="quote bottom">❝</span>
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div id="footerBlock" class="footer">
-              <span id="previewAuthor" class="author" dir="auto"></span>
-              <div id="websiteRow" class="website-row">
-                <span id="leftLine" class="line"></span>
-                <span id="previewWebsite"></span>
-                <span id="rightLine" class="line"></span>
+              <div id="footerBlock" class="footer">
+                <span id="previewAuthor" class="author" dir="auto"></span>
+                <div id="websiteRow" class="website-row">
+                  <span id="websiteLineLeft" class="website-line"></span>
+                  <span id="previewWebsite"></span>
+                  <span id="websiteLineRight" class="website-line"></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <p class="preview-footnote">Preview updates live. Use the PNG button when the card is ready.</p>
+        <div class="preview-note">Preview updates live.</div>
       </div>
     </main>
   </div>
@@ -680,9 +606,9 @@
         bg: "linear-gradient(135deg, #0f172a 0%, #000000 100%)",
         text: "#ffffff",
         accent: "#94a3b8",
-        fontTitle: '"Segoe UI", sans-serif',
-        fontBody: '"Segoe UI", sans-serif',
-        fontFooter: '"Segoe UI", sans-serif',
+        fontTitle: "sans-serif",
+        fontBody: "sans-serif",
+        fontFooter: "sans-serif",
         patternOpacity: 0.05
       },
       gold: {
@@ -693,7 +619,7 @@
         accent: "#fcd34d",
         fontTitle: '"Aref Ruqaa", serif',
         fontBody: '"Amiri", serif',
-        fontFooter: '"Segoe UI", sans-serif',
+        fontFooter: "sans-serif",
         patternOpacity: 0.1
       },
       clean: {
@@ -702,12 +628,14 @@
         bg: "#ffffff",
         text: "#1f2937",
         accent: "#6b7280",
-        fontTitle: '"Segoe UI", sans-serif',
-        fontBody: '"Segoe UI", sans-serif',
-        fontFooter: '"Segoe UI", sans-serif',
+        fontTitle: "sans-serif",
+        fontBody: "sans-serif",
+        fontFooter: "sans-serif",
         patternOpacity: 0
       }
     };
+
+    const islamicPattern = "data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20z' fill='%23d4af37' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E";
 
     const elements = {
       titleInput: document.getElementById("titleInput"),
@@ -728,9 +656,9 @@
       previewCard: document.getElementById("previewCard"),
       patternLayer: document.getElementById("patternLayer"),
       frameLayer: document.getElementById("frameLayer"),
-      cornersLayer: document.getElementById("cornersLayer"),
       badgeWrap: document.getElementById("badgeWrap"),
       previewTitle: document.getElementById("previewTitle"),
+      contentLayer: document.getElementById("contentLayer"),
       contentShell: document.getElementById("contentShell"),
       previewContent: document.getElementById("previewContent"),
       contentText: document.getElementById("contentText"),
@@ -738,10 +666,19 @@
       quoteBottom: document.getElementById("quoteBottom"),
       footerBlock: document.getElementById("footerBlock"),
       previewAuthor: document.getElementById("previewAuthor"),
-      websiteRow: document.getElementById("websiteRow"),
       previewWebsite: document.getElementById("previewWebsite"),
-      leftLine: document.getElementById("leftLine"),
-      rightLine: document.getElementById("rightLine")
+      websiteRow: document.getElementById("websiteRow"),
+      websiteLineLeft: document.getElementById("websiteLineLeft"),
+      websiteLineRight: document.getElementById("websiteLineRight"),
+      alignLeft: document.getElementById("alignLeft"),
+      alignCenter: document.getElementById("alignCenter"),
+      alignRight: document.getElementById("alignRight"),
+      corners: [
+        document.getElementById("cornerTopLeft"),
+        document.getElementById("cornerTopRight"),
+        document.getElementById("cornerBottomLeft"),
+        document.getElementById("cornerBottomRight")
+      ]
     };
 
     function buildThemeButtons() {
@@ -764,7 +701,7 @@
 
     function setStatus(message, isError) {
       elements.statusText.textContent = message;
-      elements.statusText.style.color = isError ? "#b91c1c" : "var(--muted)";
+      elements.statusText.style.color = isError ? "#b91c1c" : "#6b7280";
     }
 
     function render() {
@@ -788,23 +725,30 @@
         button.classList.toggle("active", button.dataset.theme === state.theme && !state.bgImage);
       });
 
-      elements.previewCard.style.padding = `${state.padding}px`;
-      elements.previewCard.style.background = state.bgImage ? `center / cover no-repeat url(${state.bgImage})` : currentTheme.bg;
+      elements.alignLeft.classList.toggle("active", state.alignment === "left");
+      elements.alignCenter.classList.toggle("active", state.alignment === "center");
+      elements.alignRight.classList.toggle("active", state.alignment === "right");
+
+      elements.previewCard.style.background = state.bgImage ? `url(${state.bgImage}) center/cover` : currentTheme.bg;
       elements.previewCard.style.color = currentTheme.text;
       elements.previewCard.style.fontFamily = currentTheme.fontBody;
 
-      elements.patternLayer.classList.toggle("is-hidden", Boolean(state.bgImage));
+      elements.contentLayer.style.padding = `${state.padding}px`;
+      elements.patternLayer.style.backgroundImage = `url(${islamicPattern})`;
       elements.patternLayer.style.opacity = state.bgImage ? "0" : String(currentTheme.patternOpacity);
-      elements.frameLayer.classList.toggle("is-hidden", !isFashny);
-      elements.cornersLayer.classList.toggle("is-hidden", !isFashny);
-      elements.badgeWrap.classList.toggle("is-hidden", !isFashny);
+      elements.patternLayer.classList.toggle("hidden", Boolean(state.bgImage));
+
+      elements.frameLayer.classList.toggle("hidden", !isFashny);
+      elements.badgeWrap.classList.toggle("hidden", !isFashny);
+      elements.corners.forEach((corner) => {
+        corner.classList.toggle("hidden", !isFashny);
+      });
 
       elements.previewTitle.textContent = state.title;
       elements.previewTitle.style.fontFamily = currentTheme.fontTitle;
-      elements.previewTitle.classList.toggle("text-gradient-gold", isFashny);
-      elements.previewTitle.classList.toggle("is-hidden", !state.title);
+      elements.previewTitle.classList.toggle("gold", isFashny);
+      elements.previewTitle.classList.toggle("hidden", !state.title);
 
-      elements.contentShell.classList.toggle("glass-card", isFashny);
       if (!isFashny) {
         elements.contentShell.style.background = "transparent";
         elements.contentShell.style.backdropFilter = "none";
@@ -818,26 +762,26 @@
         elements.contentShell.style.boxShadow = "";
         elements.contentShell.style.padding = "";
       }
+      elements.contentShell.style.width = "100%";
 
       elements.previewContent.style.fontSize = `${state.fontSize}px`;
       elements.previewContent.style.lineHeight = String(state.lineHeight);
       elements.previewContent.style.textAlign = state.alignment;
       elements.contentText.textContent = state.content;
-      elements.quoteTop.classList.toggle("is-hidden", !isFashny);
-      elements.quoteBottom.classList.toggle("is-hidden", !isFashny);
+      elements.quoteTop.classList.toggle("hidden", !isFashny);
+      elements.quoteBottom.classList.toggle("hidden", !isFashny);
 
-      elements.footerBlock.classList.toggle("is-hidden", !hasFooter);
+      elements.footerBlock.classList.toggle("hidden", !hasFooter);
       elements.previewAuthor.textContent = state.author;
       elements.previewAuthor.style.color = currentTheme.accent;
       elements.previewAuthor.style.fontFamily = isFashny ? '"Aref Ruqaa", serif' : currentTheme.fontBody;
-      elements.previewAuthor.classList.toggle("is-hidden", !state.author);
+      elements.previewAuthor.classList.toggle("hidden", !state.author);
 
       elements.previewWebsite.textContent = state.website;
       elements.previewWebsite.style.fontFamily = currentTheme.fontFooter;
-      elements.websiteRow.classList.toggle("is-hidden", !state.website);
-      const showWebsiteLines = isFashny && Boolean(state.website);
-      elements.leftLine.classList.toggle("is-hidden", !showWebsiteLines);
-      elements.rightLine.classList.toggle("is-hidden", !showWebsiteLines);
+      elements.websiteRow.classList.toggle("hidden", !state.website);
+      elements.websiteLineLeft.classList.toggle("hidden", !isFashny || !state.website);
+      elements.websiteLineRight.classList.toggle("hidden", !isFashny || !state.website);
     }
 
     function bindInputs() {
@@ -876,6 +820,21 @@
         render();
       });
 
+      elements.alignLeft.addEventListener("click", () => {
+        state.alignment = "left";
+        render();
+      });
+
+      elements.alignCenter.addEventListener("click", () => {
+        state.alignment = "center";
+        render();
+      });
+
+      elements.alignRight.addEventListener("click", () => {
+        state.alignment = "right";
+        render();
+      });
+
       elements.imageButton.addEventListener("click", () => {
         elements.imageInput.click();
       });
@@ -887,7 +846,7 @@
         }
 
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onloadend = () => {
           state.bgImage = typeof reader.result === "string" ? reader.result : "";
           render();
         };
@@ -897,60 +856,48 @@
 
     function prepareCloneForExport(clonedDocument) {
       const clonedTitle = clonedDocument.getElementById("previewTitle");
-
-      if (clonedTitle && clonedTitle.classList.contains("text-gradient-gold")) {
-        clonedTitle.classList.remove("text-gradient-gold");
+      if (clonedTitle && clonedTitle.classList.contains("gold")) {
+        clonedTitle.classList.remove("gold");
         clonedTitle.style.background = "none";
-        clonedTitle.style.webkitBackgroundClip = "border-box";
-        clonedTitle.style.backgroundClip = "border-box";
         clonedTitle.style.webkitTextFillColor = "#ebd393";
         clonedTitle.style.color = "#ebd393";
       }
     }
 
-    async function downloadCardAsPng() {
+    async function downloadAsPng() {
       if (typeof html2canvas !== "function") {
         setStatus("Download library failed to load. Refresh the page and try again.", true);
         return;
       }
 
       elements.downloadButton.disabled = true;
-      setStatus("Preparing PNG download...", false);
+      setStatus("Preparing PNG...", false);
 
       try {
         if (document.fonts && document.fonts.ready) {
           await document.fonts.ready;
         }
 
-        const exportWidth = Math.round(elements.previewCard.getBoundingClientRect().width);
-        const exportHeight = Math.round(elements.previewCard.getBoundingClientRect().height);
-
         const canvas = await html2canvas(elements.previewCard, {
           backgroundColor: null,
           scale: 3,
-          width: exportWidth,
-          height: exportHeight,
           useCORS: true,
           allowTaint: true,
           logging: false,
-          windowWidth: exportWidth,
-          windowHeight: exportHeight,
           onclone: (clonedDocument) => {
             prepareCloneForExport(clonedDocument);
           }
         });
 
-        const dataUrl = canvas.toDataURL("image/png");
         const link = document.createElement("a");
-        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        link.href = dataUrl;
-        link.download = `story-card-${timestamp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.download = `story-card-${new Date().toISOString().replace(/[:.]/g, "-")}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         setStatus("PNG downloaded.", false);
       } catch (error) {
-        setStatus("Could not create the PNG. Try another image or refresh the page.", true);
+        setStatus("Could not create the PNG. Refresh and try again.", true);
       } finally {
         elements.downloadButton.disabled = false;
       }
@@ -959,7 +906,7 @@
     buildThemeButtons();
     bindInputs();
     render();
-    elements.downloadButton.addEventListener("click", downloadCardAsPng);
+    elements.downloadButton.addEventListener("click", downloadAsPng);
   </script>
 </body>
 </html>
