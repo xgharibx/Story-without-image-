@@ -390,9 +390,9 @@
 
     .card-title {
       margin: 0 0 16px;
-      line-height: 1.4;
+      line-height: 1.2;
       text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-      font-size: clamp(1.7rem, 2.5vw, 2.2rem);
+      font-size: 2rem;
     }
 
     .text-gradient-gold {
@@ -495,6 +495,10 @@
         --preview-size: min(500px, calc(100vw - 32px), calc(100vh - 260px));
       }
 
+      .card-title {
+        font-size: 1.8rem;
+      }
+
       .app {
         flex-direction: column;
       }
@@ -518,7 +522,7 @@
       <div class="panel-header">
         <div>
           <h1 class="panel-title">Card Editor</h1>
-          <p class="panel-subtitle">Edit the text, switch the theme, upload any image, then download the final square card as a JPG.</p>
+          <p class="panel-subtitle">Edit the text, switch the theme, upload any image, then download the final square card as a PNG.</p>
         </div>
       </div>
 
@@ -587,7 +591,7 @@
       </section>
 
       <section class="section">
-        <button id="downloadButton" class="download-button" type="button">Download as JPG</button>
+        <button id="downloadButton" class="download-button" type="button">Download as PNG</button>
         <p id="statusText" class="status"></p>
       </section>
     </aside>
@@ -639,7 +643,7 @@
           </div>
         </div>
 
-        <p class="preview-footnote">Preview updates live. Use the JPG button when the card is ready.</p>
+        <p class="preview-footnote">Preview updates live. Use the PNG button when the card is ready.</p>
       </div>
     </main>
   </div>
@@ -904,42 +908,49 @@
       }
     }
 
-    async function downloadCardAsJpg() {
+    async function downloadCardAsPng() {
       if (typeof html2canvas !== "function") {
         setStatus("Download library failed to load. Refresh the page and try again.", true);
         return;
       }
 
       elements.downloadButton.disabled = true;
-      setStatus("Preparing JPG download...", false);
+      setStatus("Preparing PNG download...", false);
 
       try {
         if (document.fonts && document.fonts.ready) {
           await document.fonts.ready;
         }
 
+        const exportWidth = Math.round(elements.previewCard.getBoundingClientRect().width);
+        const exportHeight = Math.round(elements.previewCard.getBoundingClientRect().height);
+
         const canvas = await html2canvas(elements.previewCard, {
           backgroundColor: null,
           scale: 3,
+          width: exportWidth,
+          height: exportHeight,
           useCORS: true,
           allowTaint: true,
           logging: false,
+          windowWidth: exportWidth,
+          windowHeight: exportHeight,
           onclone: (clonedDocument) => {
             prepareCloneForExport(clonedDocument);
           }
         });
 
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+        const dataUrl = canvas.toDataURL("image/png");
         const link = document.createElement("a");
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         link.href = dataUrl;
-        link.download = `story-card-${timestamp}.jpg`;
+        link.download = `story-card-${timestamp}.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        setStatus("JPG downloaded.", false);
+        setStatus("PNG downloaded.", false);
       } catch (error) {
-        setStatus("Could not create the JPG. Try another image or refresh the page.", true);
+        setStatus("Could not create the PNG. Try another image or refresh the page.", true);
       } finally {
         elements.downloadButton.disabled = false;
       }
@@ -948,7 +959,7 @@
     buildThemeButtons();
     bindInputs();
     render();
-    elements.downloadButton.addEventListener("click", downloadCardAsJpg);
+    elements.downloadButton.addEventListener("click", downloadCardAsPng);
   </script>
 </body>
 </html>
