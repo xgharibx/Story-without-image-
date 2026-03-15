@@ -891,6 +891,19 @@
       });
     }
 
+    function prepareCloneForExport(clonedDocument) {
+      const clonedTitle = clonedDocument.getElementById("previewTitle");
+
+      if (clonedTitle && clonedTitle.classList.contains("text-gradient-gold")) {
+        clonedTitle.classList.remove("text-gradient-gold");
+        clonedTitle.style.background = "none";
+        clonedTitle.style.webkitBackgroundClip = "border-box";
+        clonedTitle.style.backgroundClip = "border-box";
+        clonedTitle.style.webkitTextFillColor = "#ebd393";
+        clonedTitle.style.color = "#ebd393";
+      }
+    }
+
     async function downloadCardAsJpg() {
       if (typeof html2canvas !== "function") {
         setStatus("Download library failed to load. Refresh the page and try again.", true);
@@ -910,7 +923,10 @@
           scale: 3,
           useCORS: true,
           allowTaint: true,
-          logging: false
+          logging: false,
+          onclone: (clonedDocument) => {
+            prepareCloneForExport(clonedDocument);
+          }
         });
 
         const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
