@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Card Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --page-bg: #eef2f1;
+      --panel-bg: #ffffff;
+      --panel-border: #dbe4de;
+      --panel-text: #122118;
+      --muted: #5e6d64;
+      --accent: #166534;
+      --accent-strong: #0f5132;
+      --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.14);
+      --shadow-card: 0 28px 60px rgba(15, 23, 42, 0.22);
+      --preview-size: min(500px, 90vw);
+      --pattern-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20z' fill='%23d4af37' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(52, 211, 153, 0.14), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 25%),
+        var(--page-bg);
+      color: var(--panel-text);
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .panel {
+      width: min(380px, 100%);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-right: 1px solid var(--panel-border);
+      box-shadow: var(--shadow-lg);
+      padding: 28px 24px;
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .panel-subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #31443a;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid #cfd9d2;
+      border-radius: 12px;
+      background: #ffffff;
+      color: var(--panel-text);
+      padding: 12px 14px;
+      font: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: rgba(22, 101, 52, 0.55);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .theme-button {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-button:hover {
+      transform: scale(1.05);
+    }
+
+    .theme-button.active {
+      transform: scale(1.08);
+      border-color: #065f46;
+      box-shadow: 0 10px 20px rgba(6, 95, 70, 0.16);
+    }
+
+    .upload-button,
+    .download-button {
+      width: 100%;
+      border: 1px solid #cfd9d2;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .upload-button {
+      background: #ffffff;
+      border-style: dashed;
+      color: var(--muted);
+    }
+
+    .upload-button:hover {
+      border-color: rgba(22, 101, 52, 0.55);
+      background: #f7fbf8;
+    }
+
+    .download-button {
+      background: linear-gradient(135deg, #166534 0%, #0f5132 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 14px 30px rgba(22, 101, 52, 0.22);
+    }
+
+    .download-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(22, 101, 52, 0.26);
+    }
+
+    .download-button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+      transform: none;
+      box-shadow: 0 12px 24px rgba(22, 101, 52, 0.18);
+    }
+
+    .slider-row {
+      margin-bottom: 18px;
+    }
+
+    .slider-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 1.3rem;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .preview-shell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: auto;
+      position: relative;
+    }
+
+    .preview-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(15, 81, 50, 0.08), transparent 45%),
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.45), transparent 40%);
+      pointer-events: none;
+    }
+
+    .preview-area {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .preview-heading {
+      text-align: center;
+    }
+
+    .preview-heading h2 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+    }
+
+    .preview-heading p,
+    .preview-footnote {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .card {
+      position: relative;
+      width: var(--preview-size);
+      height: var(--preview-size);
+      padding: 30px;
+      overflow: hidden;
+      color: #f1f8f4;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      transition: background 0.3s ease, padding 0.3s ease;
+      isolation: isolate;
+    }
+
+    .card-pattern,
+    .card-frame,
+    .card-corners {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .card-pattern {
+      background-image: var(--pattern-image);
+      opacity: 0.08;
+      z-index: 0;
+    }
+
+    .card-frame {
+      inset: 16px;
+      border: 1px solid rgba(197, 160, 89, 0.4);
+      border-radius: 18px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+
+    .corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-color: #c5a059;
+      z-index: 1;
+    }
+
+    .corner.top-left {
+      top: 10px;
+      left: 10px;
+      border-top: 2px solid;
+      border-left: 2px solid;
+    }
+
+    .corner.top-right {
+      top: 10px;
+      right: 10px;
+      border-top: 2px solid;
+      border-right: 2px solid;
+    }
+
+    .corner.bottom-left {
+      bottom: 10px;
+      left: 10px;
+      border-bottom: 2px solid;
+      border-left: 2px solid;
+    }
+
+    .corner.bottom-right {
+      bottom: 10px;
+      right: 10px;
+      border-bottom: 2px solid;
+      border-right: 2px solid;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+
+    .badge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(197, 160, 89, 0.5);
+      background: rgba(255, 255, 255, 0.1);
+      color: #d8f3dc;
+      font-family: "Reem Kufi", sans-serif;
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+    }
+
+    .moon {
+      font-size: 1.8rem;
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+      line-height: 1;
+    }
+
+    .card-title {
+      margin: 0 0 16px;
+      line-height: 1.4;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      font-size: clamp(1.7rem, 2.5vw, 2.2rem);
+    }
+
+    .text-gradient-gold {
+      background: linear-gradient(to bottom, #fff, #ebd393);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .body-shell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0 8px;
+    }
+
+    .content-shell {
+      width: 100%;
+    }
+
+    .glass-card {
+      width: 100%;
+      border-radius: 20px;
+      background: rgba(10, 30, 20, 0.4);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      padding: 22px 18px;
+    }
+
+    .content-text {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.8;
+    }
+
+    .quote-mark {
+      display: block;
+      height: 20px;
+      color: #c5a059;
+      opacity: 0.3;
+      font-family: "Aref Ruqaa", serif;
+      font-size: 2.5rem;
+      line-height: 0.6;
+    }
+
+    .quote-mark.bottom {
+      margin-top: 12px;
+      transform: rotate(180deg);
+    }
+
+    .quote-mark.top {
+      margin-bottom: 10px;
+      margin-top: -4px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding-top: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .author {
+      font-size: 1.1rem;
+    }
+
+    .website-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0.72;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+    }
+
+    .line {
+      width: 34px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #567e6a, transparent);
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .divider {
+      border: 0;
+      border-top: 1px solid #edf2ee;
+      margin: 24px 0;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        flex-direction: column;
+      }
+
+      .panel {
+        width: 100%;
+        max-height: none;
+        border-right: 0;
+        border-bottom: 1px solid var(--panel-border);
+      }
+
+      .preview-shell {
+        padding: 20px 16px 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Card Editor</h1>
+          <p class="panel-subtitle">Edit the text, switch the theme, upload any image, then download the final square card as a JPG.</p>
+        </div>
+      </div>
+
+      <section class="section">
+        <h2 class="section-title">Content</h2>
+
+        <div class="field">
+          <label for="titleInput">Title</label>
+          <input id="titleInput" type="text" dir="auto" />
+        </div>
+
+        <div class="field">
+          <label for="contentInput">Content</label>
+          <textarea id="contentInput" dir="auto"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="authorInput">Footer Info</label>
+          <input id="authorInput" type="text" placeholder="Author Name" dir="auto" />
+        </div>
+
+        <div class="field">
+          <input id="websiteInput" type="text" placeholder="Website" dir="auto" />
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="section">
+        <h2 class="section-title">Theme</h2>
+        <div id="themeGrid" class="theme-grid"></div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">Background Image</h2>
+        <input id="imageInput" type="file" accept="image/*" hidden />
+        <button id="imageButton" class="upload-button" type="button">Upload Image</button>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">Style</h2>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Text Size</span>
+            <span id="fontSizeValue"></span>
+          </div>
+          <input id="fontSizeInput" type="range" min="14" max="40" step="1" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Spacing</span>
+            <span id="lineHeightValue"></span>
+          </div>
+          <input id="lineHeightInput" type="range" min="1" max="2.5" step="0.1" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Padding</span>
+            <span id="paddingValue"></span>
+          </div>
+          <input id="paddingInput" type="range" min="10" max="80" step="1" />
+        </div>
+      </section>
+
+      <section class="section">
+        <button id="downloadButton" class="download-button" type="button">Download as JPG</button>
+        <p id="statusText" class="status"></p>
+      </section>
+    </aside>
+
+    <main class="preview-shell">
+      <div class="preview-area">
+        <div class="preview-heading">
+          <h2>Preview</h2>
+          <p>1:1 Square (WhatsApp Ready)</p>
+        </div>
+
+        <div id="previewCard" class="card">
+          <div id="patternLayer" class="card-pattern"></div>
+          <div id="frameLayer" class="card-frame"></div>
+          <div id="cornersLayer" class="card-corners">
+            <span class="corner top-left"></span>
+            <span class="corner top-right"></span>
+            <span class="corner bottom-left"></span>
+            <span class="corner bottom-right"></span>
+          </div>
+
+          <div class="card-content">
+            <div>
+              <div id="badgeWrap" class="badge-wrap">
+                <span class="badge">نفحات إيمانية</span>
+                <span class="moon">🌙</span>
+              </div>
+              <h1 id="previewTitle" class="card-title" dir="auto"></h1>
+            </div>
+
+            <div class="body-shell">
+              <div id="contentShell" class="content-shell glass-card">
+                <p id="previewContent" class="content-text" dir="auto">
+                  <span id="quoteTop" class="quote-mark top">❝</span>
+                  <span id="contentText"></span>
+                  <span id="quoteBottom" class="quote-mark bottom">❝</span>
+                </p>
+              </div>
+            </div>
+
+            <div id="footerBlock" class="footer">
+              <span id="previewAuthor" class="author" dir="auto"></span>
+              <div id="websiteRow" class="website-row">
+                <span id="leftLine" class="line"></span>
+                <span id="previewWebsite"></span>
+                <span id="rightLine" class="line"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="preview-footnote">Preview updates live. Use the JPG button when the card is ready.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      title: "دُعاءُ اسْتِقْبَالِ الشَّهْرِ الكَرِيمِ",
+      content: "«اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالأَمْنِ وَالإِيمَانِ، وَالسَّلامَةِ وَالإِسْلامِ، وَالتَّوْفِيقِ لِمَا تُحِبُّ وَتَرْضَى. اللَّهُمَّ اجْعَلْنَا فِيهِ مِنَ الصَّائِمِينَ القَائِمِينَ قَبُولاً لا عَنَاءً، وَاجْعَلْ حَظَّنَا مِنْهُ الرَّحْمَةَ وَالمَغْفِرَةَ وَالعِتْقَ مِنَ النِّيرانِ.»",
+      author: "الشيخ أحمد إسماعيل الفشني",
+      website: "ahmedelfashny.com",
+      fontSize: 20,
+      lineHeight: 1.8,
+      padding: 30,
+      alignment: "center",
+      theme: "fashny",
+      bgImage: ""
+    };
+
+    const themes = {
+      fashny: {
+        id: "fashny",
+        name: "Fashny Green",
+        bg: "radial-gradient(circle at 50% 30%, #1e5c3f 0%, #0d3321 50%, #020f08 100%)",
+        text: "#f1f8f4",
+        accent: "#c5a059",
+        fontTitle: '"Aref Ruqaa", serif',
+        fontBody: '"Amiri", serif',
+        fontFooter: '"Reem Kufi", sans-serif',
+        patternOpacity: 0.08
+      },
+      midnight: {
+        id: "midnight",
+        name: "Midnight",
+        bg: "linear-gradient(135deg, #0f172a 0%, #000000 100%)",
+        text: "#ffffff",
+        accent: "#94a3b8",
+        fontTitle: '"Segoe UI", sans-serif',
+        fontBody: '"Segoe UI", sans-serif',
+        fontFooter: '"Segoe UI", sans-serif',
+        patternOpacity: 0.05
+      },
+      gold: {
+        id: "gold",
+        name: "Royal Gold",
+        bg: "linear-gradient(135deg, #78350f 0%, #451a03 100%)",
+        text: "#fffbeb",
+        accent: "#fcd34d",
+        fontTitle: '"Aref Ruqaa", serif',
+        fontBody: '"Amiri", serif',
+        fontFooter: '"Segoe UI", sans-serif',
+        patternOpacity: 0.1
+      },
+      clean: {
+        id: "clean",
+        name: "Clean White",
+        bg: "#ffffff",
+        text: "#1f2937",
+        accent: "#6b7280",
+        fontTitle: '"Segoe UI", sans-serif',
+        fontBody: '"Segoe UI", sans-serif',
+        fontFooter: '"Segoe UI", sans-serif',
+        patternOpacity: 0
+      }
+    };
+
+    const elements = {
+      titleInput: document.getElementById("titleInput"),
+      contentInput: document.getElementById("contentInput"),
+      authorInput: document.getElementById("authorInput"),
+      websiteInput: document.getElementById("websiteInput"),
+      imageInput: document.getElementById("imageInput"),
+      imageButton: document.getElementById("imageButton"),
+      fontSizeInput: document.getElementById("fontSizeInput"),
+      lineHeightInput: document.getElementById("lineHeightInput"),
+      paddingInput: document.getElementById("paddingInput"),
+      fontSizeValue: document.getElementById("fontSizeValue"),
+      lineHeightValue: document.getElementById("lineHeightValue"),
+      paddingValue: document.getElementById("paddingValue"),
+      themeGrid: document.getElementById("themeGrid"),
+      downloadButton: document.getElementById("downloadButton"),
+      statusText: document.getElementById("statusText"),
+      previewCard: document.getElementById("previewCard"),
+      patternLayer: document.getElementById("patternLayer"),
+      frameLayer: document.getElementById("frameLayer"),
+      cornersLayer: document.getElementById("cornersLayer"),
+      badgeWrap: document.getElementById("badgeWrap"),
+      previewTitle: document.getElementById("previewTitle"),
+      contentShell: document.getElementById("contentShell"),
+      previewContent: document.getElementById("previewContent"),
+      contentText: document.getElementById("contentText"),
+      quoteTop: document.getElementById("quoteTop"),
+      quoteBottom: document.getElementById("quoteBottom"),
+      footerBlock: document.getElementById("footerBlock"),
+      previewAuthor: document.getElementById("previewAuthor"),
+      websiteRow: document.getElementById("websiteRow"),
+      previewWebsite: document.getElementById("previewWebsite"),
+      leftLine: document.getElementById("leftLine"),
+      rightLine: document.getElementById("rightLine")
+    };
+
+    function buildThemeButtons() {
+      Object.values(themes).forEach((theme) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "theme-button";
+        button.title = theme.name;
+        button.dataset.theme = theme.id;
+        button.style.background = theme.bg;
+        button.addEventListener("click", () => {
+          state.theme = theme.id;
+          state.bgImage = "";
+          elements.imageInput.value = "";
+          render();
+        });
+        elements.themeGrid.appendChild(button);
+      });
+    }
+
+    function setStatus(message, isError) {
+      elements.statusText.textContent = message;
+      elements.statusText.style.color = isError ? "#b91c1c" : "var(--muted)";
+    }
+
+    function render() {
+      const currentTheme = themes[state.theme];
+      const isFashny = state.theme === "fashny" && !state.bgImage;
+      const hasFooter = Boolean(state.author || state.website);
+
+      elements.titleInput.value = state.title;
+      elements.contentInput.value = state.content;
+      elements.authorInput.value = state.author;
+      elements.websiteInput.value = state.website;
+      elements.fontSizeInput.value = String(state.fontSize);
+      elements.lineHeightInput.value = String(state.lineHeight);
+      elements.paddingInput.value = String(state.padding);
+      elements.fontSizeValue.textContent = `${state.fontSize}px`;
+      elements.lineHeightValue.textContent = String(state.lineHeight);
+      elements.paddingValue.textContent = `${state.padding}px`;
+      elements.imageButton.textContent = state.bgImage ? "Change Bg Image" : "Upload Image";
+
+      Array.from(elements.themeGrid.children).forEach((button) => {
+        button.classList.toggle("active", button.dataset.theme === state.theme && !state.bgImage);
+      });
+
+      elements.previewCard.style.padding = `${state.padding}px`;
+      elements.previewCard.style.background = state.bgImage ? `center / cover no-repeat url(${state.bgImage})` : currentTheme.bg;
+      elements.previewCard.style.color = currentTheme.text;
+      elements.previewCard.style.fontFamily = currentTheme.fontBody;
+
+      elements.patternLayer.classList.toggle("is-hidden", Boolean(state.bgImage));
+      elements.patternLayer.style.opacity = state.bgImage ? "0" : String(currentTheme.patternOpacity);
+      elements.frameLayer.classList.toggle("is-hidden", !isFashny);
+      elements.cornersLayer.classList.toggle("is-hidden", !isFashny);
+      elements.badgeWrap.classList.toggle("is-hidden", !isFashny);
+
+      elements.previewTitle.textContent = state.title;
+      elements.previewTitle.style.fontFamily = currentTheme.fontTitle;
+      elements.previewTitle.classList.toggle("text-gradient-gold", isFashny);
+      elements.previewTitle.classList.toggle("is-hidden", !state.title);
+
+      elements.contentShell.classList.toggle("glass-card", isFashny);
+      if (!isFashny) {
+        elements.contentShell.style.background = "transparent";
+        elements.contentShell.style.backdropFilter = "none";
+        elements.contentShell.style.border = "0";
+        elements.contentShell.style.boxShadow = "none";
+        elements.contentShell.style.padding = "0";
+      } else {
+        elements.contentShell.style.background = "";
+        elements.contentShell.style.backdropFilter = "";
+        elements.contentShell.style.border = "";
+        elements.contentShell.style.boxShadow = "";
+        elements.contentShell.style.padding = "";
+      }
+
+      elements.previewContent.style.fontSize = `${state.fontSize}px`;
+      elements.previewContent.style.lineHeight = String(state.lineHeight);
+      elements.previewContent.style.textAlign = state.alignment;
+      elements.contentText.textContent = state.content;
+      elements.quoteTop.classList.toggle("is-hidden", !isFashny);
+      elements.quoteBottom.classList.toggle("is-hidden", !isFashny);
+
+      elements.footerBlock.classList.toggle("is-hidden", !hasFooter);
+      elements.previewAuthor.textContent = state.author;
+      elements.previewAuthor.style.color = currentTheme.accent;
+      elements.previewAuthor.style.fontFamily = isFashny ? '"Aref Ruqaa", serif' : currentTheme.fontBody;
+      elements.previewAuthor.classList.toggle("is-hidden", !state.author);
+
+      elements.previewWebsite.textContent = state.website;
+      elements.previewWebsite.style.fontFamily = currentTheme.fontFooter;
+      elements.websiteRow.classList.toggle("is-hidden", !state.website);
+      const showWebsiteLines = isFashny && Boolean(state.website);
+      elements.leftLine.classList.toggle("is-hidden", !showWebsiteLines);
+      elements.rightLine.classList.toggle("is-hidden", !showWebsiteLines);
+    }
+
+    function bindInputs() {
+      elements.titleInput.addEventListener("input", (event) => {
+        state.title = event.target.value;
+        render();
+      });
+
+      elements.contentInput.addEventListener("input", (event) => {
+        state.content = event.target.value;
+        render();
+      });
+
+      elements.authorInput.addEventListener("input", (event) => {
+        state.author = event.target.value;
+        render();
+      });
+
+      elements.websiteInput.addEventListener("input", (event) => {
+        state.website = event.target.value;
+        render();
+      });
+
+      elements.fontSizeInput.addEventListener("input", (event) => {
+        state.fontSize = Number(event.target.value);
+        render();
+      });
+
+      elements.lineHeightInput.addEventListener("input", (event) => {
+        state.lineHeight = Number(event.target.value);
+        render();
+      });
+
+      elements.paddingInput.addEventListener("input", (event) => {
+        state.padding = Number(event.target.value);
+        render();
+      });
+
+      elements.imageButton.addEventListener("click", () => {
+        elements.imageInput.click();
+      });
+
+      elements.imageInput.addEventListener("change", (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) {
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          state.bgImage = typeof reader.result === "string" ? reader.result : "";
+          render();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function downloadCardAsJpg() {
+      if (typeof html2canvas !== "function") {
+        setStatus("Download library failed to load. Refresh the page and try again.", true);
+        return;
+      }
+
+      elements.downloadButton.disabled = true;
+      setStatus("Preparing JPG download...", false);
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          await document.fonts.ready;
+        }
+
+        const canvas = await html2canvas(elements.previewCard, {
+          backgroundColor: null,
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+        const link = document.createElement("a");
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        link.href = dataUrl;
+        link.download = `story-card-${timestamp}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setStatus("JPG downloaded.", false);
+      } catch (error) {
+        setStatus("Could not create the JPG. Try another image or refresh the page.", true);
+      } finally {
+        elements.downloadButton.disabled = false;
+      }
+    }
+
+    buildThemeButtons();
+    bindInputs();
+    render();
+    elements.downloadButton.addEventListener("click", downloadCardAsJpg);
+  </script>
+</body>
+</html>
