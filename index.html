@@ -19,7 +19,7 @@
       --accent-strong: #0f5132;
       --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.14);
       --shadow-card: 0 28px 60px rgba(15, 23, 42, 0.22);
-      --preview-size: min(500px, 90vw);
+      --preview-size: min(500px, calc(100vw - 460px), calc(100vh - 170px));
       --pattern-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v20h2V0h2v20h2v2H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20z' fill='%23d4af37' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E");
     }
 
@@ -255,8 +255,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 16px;
       width: 100%;
+      min-height: 100%;
     }
 
     .preview-heading {
@@ -489,6 +491,10 @@
     }
 
     @media (max-width: 900px) {
+      :root {
+        --preview-size: min(500px, calc(100vw - 32px), calc(100vh - 260px));
+      }
+
       .app {
         flex-direction: column;
       }
